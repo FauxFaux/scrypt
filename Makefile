@@ -19,9 +19,9 @@ else ifeq ($(TARGET), win32)
 else ifeq ($(TARGET), win64)
 	DYLIB     := dll
 	LDFLAGS   := -shared
-	CC        := i686-w64-mingw32-gcc
+	CC        := x86_64-w64-mingw32-gcc
 	SSE2      :=
-	CFLAGS    += -fPIC -I $(JAVA_HOME)/include -I $(JAVA_HOME)/include/$(TARGET) -DNO_HAVE_POSIX_MEMALIGN
+	CFLAGS    += -I $(JAVA_HOME)/include -I $(JAVA_HOME)/include/$(TARGET) -DNO_HAVE_POSIX_MEMALIGN
 else
 	DYLIB     := so
 	LDFLAGS   := -shared
