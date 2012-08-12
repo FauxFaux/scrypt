@@ -20,7 +20,6 @@ else ifeq ($(TARGET), win64)
 	DYLIB     := dll
 	LDFLAGS   := -shared
 	CC        := x86_64-w64-mingw32-gcc
-	SSE2      :=
 	CFLAGS    += -I $(JAVA_HOME)/include -I $(JAVA_HOME)/include/$(TARGET) -DNO_HAVE_POSIX_MEMALIGN
 else
 	DYLIB     := so
