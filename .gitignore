@@ -1,6 +1,7 @@
 target/
 *.o
 *.swp
+bin/
 .classpath
 .project
 .settings/
