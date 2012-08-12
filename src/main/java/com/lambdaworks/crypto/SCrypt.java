@@ -25,7 +25,28 @@ public class SCrypt {
 
     static {
         LibraryLoader loader = LibraryLoaders.loader();
-        native_library_loaded = loader.load("scrypt", true);
+        final String nativeRequirement = System.getProperty("scrypt.native");
+        boolean tryLoad = true;
+        boolean requireLoad = false;
+        if (null != nativeRequirement) {
+            if ("false".equalsIgnoreCase(nativeRequirement)) {
+                tryLoad = false;
+            } else if ("require".equalsIgnoreCase(nativeRequirement)) {
+                requireLoad = true;
+            } else if (!"default".equalsIgnoreCase(nativeRequirement)) {
+                throw new IllegalArgumentException("Unrecognised scrypt.native, " +
+                        "expecting false, require or default; not " + nativeRequirement);
+            }
+        }
+
+        if (tryLoad) {
+            native_library_loaded = loader.load("scrypt", true);
+            if (requireLoad && !native_library_loaded) {
+                throw new IllegalStateException("native scrypt library failed to load");
+            }
+        } else {
+            native_library_loaded = false;
+        }
     }
 
     /**
