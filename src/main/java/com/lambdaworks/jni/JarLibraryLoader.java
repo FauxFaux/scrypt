@@ -62,7 +62,7 @@ public class JarLibraryLoader implements LibraryLoader {
                     JarEntry entry = jar.getJarEntry(path);
                     if (entry == null) continue;
 
-                    File lib = extract(name, jar.getInputStream(entry));
+                    File lib = extract(name, jar.getInputStream(entry), new File(path).getName());
                     System.load(lib.getAbsolutePath());
                     lib.delete();
 
@@ -84,16 +84,17 @@ public class JarLibraryLoader implements LibraryLoader {
      *
      * @param name  Name prefix for temp file.
      * @param is    Jar entry input stream.
+     * @param nameSuggestion a suffix for the temporary file name
      *
      * @return A temporary file.
      *
      * @throws IOException when an IO error occurs.
      */
-    private static File extract(String name, InputStream is) throws IOException {
+    private static File extract(String name, InputStream is, String nameSuggestion) throws IOException {
         byte[] buf = new byte[4096];
         int len;
 
-        File lib = File.createTempFile(name, "lib");
+        File lib = File.createTempFile(name, nameSuggestion);
         FileOutputStream os = new FileOutputStream(lib);
 
         try {
@@ -133,6 +134,9 @@ public class JarLibraryLoader implements LibraryLoader {
             case darwin:
                 candidates.add(sb + ".dylib");
                 candidates.add(sb + ".jnilib");
+                break;
+            case windows:
+                candidates.add(sb + ".dll");
                 break;
             case linux:
             case freebsd:
