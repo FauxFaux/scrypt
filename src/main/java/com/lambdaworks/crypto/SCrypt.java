@@ -159,7 +159,9 @@ public class SCrypt {
         arraycopy(BY, Bi + (2 * r - 1) * 64, X.array(), 0, 64);
 
         for (i = 0; i < 2 * r; i++) {
-            blockxor2(BY, i * 64, X.array());
+            for (int j = 0; j < 64; j++) {
+                X.put(j, (byte)(X.get(j) ^ BY[i * 64 + j]));
+            }
             salsa20_8(X);
             arraycopy(X.array(), 0, BY, Yi + (i * 64), 64);
         }
@@ -211,12 +213,6 @@ public class SCrypt {
     public static void blockxor(byte[] S, int Si, byte[] D, int Di, int len) {
         for (int i = 0; i < len; i++) {
             D[Di + i] ^= S[Si + i];
-        }
-    }
-
-    public static void blockxor2(byte[] S, int Si, byte[] D) {
-        for (int i = 0; i < 64; i++) {
-            D[0 + i] ^= S[Si + i];
         }
     }
 
