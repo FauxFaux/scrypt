@@ -186,9 +186,7 @@ public class SCrypt {
         arraycopy(BY, Bi + (2 * r - 1) * 64, X, 0, 64);
 
         for (i = 0; i < 2 * r; i++) {
-            for (int j = 0; j < 64; j++) {
-                X.put(j, (byte)(X.get(j) ^ BY.array()[i * 64 + j]));
-            }
+            blockxor(BY.array(), i*64, X.array(), 0, 64);
             salsa20_8(X);
             arraycopy(X, 0, BY, Yi + (i * 64), 64);
         }
