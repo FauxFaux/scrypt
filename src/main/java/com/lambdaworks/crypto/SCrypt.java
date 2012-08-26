@@ -143,7 +143,7 @@ public class SCrypt {
 
         for (i = 0; i < N; i++) {
             int j = integerify(XY.array(), Xi, r) & (N - 1);
-            blockxor(V.array(), j * (128 * r), XY.array(), Xi, 128 * r);
+            blockxor(V, j * (128 * r), XY, Xi, 128 * r);
             blockmix_salsa8(XY, Xi, Yi, r);
         }
 
@@ -186,7 +186,7 @@ public class SCrypt {
         arraycopy(BY, Bi + (2 * r - 1) * 64, X, 0, 64);
 
         for (i = 0; i < 2 * r; i++) {
-            blockxor(BY.array(), i*64, X.array(), 0, 64);
+            blockxor(BY, i*64, X, 0, 64);
             salsa20_8(X);
             arraycopy(X, 0, BY, Yi + (i * 64), 64);
         }
@@ -236,9 +236,9 @@ public class SCrypt {
         B32.rewind();
     }
 
-    public static void blockxor(byte[] S, int Si, byte[] D, int Di, int len) {
+    public static void blockxor(ByteBuffer S, int Si, ByteBuffer D, int Di, int len) {
         for (int i = 0; i < len; i++) {
-            D[Di + i] ^= S[Si + i];
+            D.put(Di + i, (byte) (D.get(Di + i) ^ S.get(Si + i)));
         }
     }
 
