@@ -165,7 +165,7 @@ public class SCrypt {
     }
 
     public static void blockmix_salsa8(byte[] BY, int Bi, int Yi, int r) {
-        ByteBuffer X = ByteBuffer.allocate(64);
+        ByteBuffer X = ByteBuffer.allocateDirect(64);
         X.order(ByteOrder.LITTLE_ENDIAN);
         int i;
 
