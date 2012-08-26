@@ -114,8 +114,8 @@ public class SCrypt {
         byte[] DK = new byte[dkLen];
 
         byte[] B  = new byte[128 * r * p];
-        byte[] XY = new byte[256 * r];
-        byte[] V  = new byte[128 * r * N];
+        ByteBuffer XY = bb(256 * r);
+        ByteBuffer V  = bb(128 * r * N);
         int i;
 
         PBKDF.pbkdf2(mac, salt, 1, B, p * 128 * r);
@@ -129,7 +129,7 @@ public class SCrypt {
         return DK;
     }
 
-    public static void smix(byte[] B, int Bi, int r, int N, byte[] V, byte[] XY) {
+    public static void smix(byte[] B, int Bi, int r, int N, ByteBuffer V, ByteBuffer XY) {
         int Xi = 0;
         int Yi = 128 * r;
         int i;
@@ -142,8 +142,8 @@ public class SCrypt {
         }
 
         for (i = 0; i < N; i++) {
-            int j = integerify(XY, Xi, r) & (N - 1);
-            blockxor(V, j * (128 * r), XY, Xi, 128 * r);
+            int j = integerify(XY.array(), Xi, r) & (N - 1);
+            blockxor(V.array(), j * (128 * r), XY.array(), Xi, 128 * r);
             blockmix_salsa8(XY, Xi, Yi, r);
         }
 
@@ -163,16 +163,23 @@ public class SCrypt {
     private static void arraycopy(byte[] src, int srcPos, ByteBuffer dest, int destPos, int len) {
         for (int i = 0; i < len; ++i)
             dest.put(i + destPos, src[srcPos + i]);
+        dest.rewind();
     }
 
     private static void arraycopy(ByteBuffer src, int srcPos, ByteBuffer dest, int destPos, int len) {
-        src.position(srcPos);
-        ByteBuffer dupl = dest.duplicate();
-        dupl.limit(len);
-        src.put(dupl);
+        arraycopy(src.array(), srcPos, dest.array(), destPos, len);
+
+        // too stupid to see why no go:
+//        dest.position(destPos);
+//        src.position(srcPos);
+//        ByteBuffer dupl = src.duplicate();
+//        dupl.limit(srcPos + len);
+//        dest.put(dupl);
+//        src.rewind();
+//        dest.rewind();
     }
 
-    public static void blockmix_salsa8(byte[] BY, int Bi, int Yi, int r) {
+    public static void blockmix_salsa8(ByteBuffer BY, int Bi, int Yi, int r) {
         ByteBuffer X = bb(64);
         int i;
 
@@ -180,7 +187,7 @@ public class SCrypt {
 
         for (i = 0; i < 2 * r; i++) {
             for (int j = 0; j < 64; j++) {
-                X.put(j, (byte)(X.get(j) ^ BY[i * 64 + j]));
+                X.put(j, (byte)(X.get(j) ^ BY.array()[i * 64 + j]));
             }
             salsa20_8(X);
             arraycopy(X, 0, BY, Yi + (i * 64), 64);
@@ -206,6 +213,7 @@ public class SCrypt {
         IntBuffer B32 = B.asIntBuffer();
 
         B32.get(x);
+        B32.rewind();
 
         for (i = 8; i > 0; i -= 2) {
             x[ 4] ^= R(x[ 0]+x[12], 7);  x[ 8] ^= R(x[ 4]+x[ 0], 9);
@@ -227,6 +235,7 @@ public class SCrypt {
         }
 
         for (i = 0; i < 16; ++i) B32.put(i, x[i] + B32.get(i));
+        B32.rewind();
     }
 
     public static void blockxor(byte[] S, int Si, byte[] D, int Di, int len) {
