@@ -173,8 +173,7 @@ public class SCrypt {
     }
 
     public static void blockmix_salsa8(byte[] BY, int Bi, int Yi, int r) {
-        ByteBuffer X = ByteBuffer.allocateDirect(64);
-        X.order(ByteOrder.LITTLE_ENDIAN);
+        ByteBuffer X = bb(64);
         int i;
 
         arraycopy(BY, Bi + (2 * r - 1) * 64, X, 0, 64);
@@ -247,5 +246,11 @@ public class SCrypt {
         n |= (B[Bi + 3] & 0xff) << 24;
 
         return n;
+    }
+
+    private static ByteBuffer bb(int len) {
+        final ByteBuffer X = ByteBuffer.allocate(len);
+        X.order(ByteOrder.LITTLE_ENDIAN);
+        return X;
     }
 }
