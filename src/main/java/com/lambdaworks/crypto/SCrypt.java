@@ -165,6 +165,13 @@ public class SCrypt {
             dest.put(i + destPos, src[srcPos + i]);
     }
 
+    private static void arraycopy(ByteBuffer src, int srcPos, ByteBuffer dest, int destPos, int len) {
+        src.position(srcPos);
+        ByteBuffer dupl = dest.duplicate();
+        dupl.limit(len);
+        src.put(dupl);
+    }
+
     public static void blockmix_salsa8(byte[] BY, int Bi, int Yi, int r) {
         ByteBuffer X = ByteBuffer.allocateDirect(64);
         X.order(ByteOrder.LITTLE_ENDIAN);
