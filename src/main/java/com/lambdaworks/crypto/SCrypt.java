@@ -198,8 +198,7 @@ public class SCrypt {
 
         IntBuffer B32 = B.asIntBuffer();
 
-        for (i = 0; i < 16; ++i)
-            x[i] = B32.get(i);
+        B32.get(x);
 
         for (i = 8; i > 0; i -= 2) {
             x[ 4] ^= R(x[ 0]+x[12], 7);  x[ 8] ^= R(x[ 4]+x[ 0], 9);
