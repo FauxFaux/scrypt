@@ -166,17 +166,14 @@ public class SCrypt {
         dest.rewind();
     }
 
-    private static void arraycopy(ByteBuffer src, int srcPos, ByteBuffer dest, int destPos, int len) {
-        arraycopy(src.array(), srcPos, dest.array(), destPos, len);
-
-        // too stupid to see why no go:
-//        dest.position(destPos);
-//        src.position(srcPos);
-//        ByteBuffer dupl = src.duplicate();
-//        dupl.limit(srcPos + len);
-//        dest.put(dupl);
-//        src.rewind();
-//        dest.rewind();
+    static void arraycopy(ByteBuffer src, int srcPos, ByteBuffer dst, int dstPos, int length) {
+        byte b[] = new byte[length];
+        src.position(srcPos);
+        src.get(b, 0, length);
+        dst.position(dstPos);
+        dst.put(b);
+        src.rewind();
+        dst.rewind();
     }
 
     public static void blockmix_salsa8(ByteBuffer BY, int Bi, int Yi, int r) {
@@ -248,7 +245,7 @@ public class SCrypt {
     }
 
     private static ByteBuffer bb(int len) {
-        final ByteBuffer X = ByteBuffer.allocate(len);
+        final ByteBuffer X = ByteBuffer.allocateDirect(len);
         X.order(ByteOrder.LITTLE_ENDIAN);
         return X;
     }
