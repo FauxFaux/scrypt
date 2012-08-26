@@ -33,18 +33,16 @@ public class Benchmark {
     public static final String ANS = "qvz1XkWUdv9r5vB2UucTp/UVJ5rkQ51uGEZfRdILG7M=";
 
     public static void main(String[] args) throws Exception {
-        System.out.println("native:");
-
-        double nat = Math.min(
-                time(repeatedly(NATIVE)),
-                time(repeatedly(NATIVE)));
-
         System.out.println("java:");
+
+        final double start = 0.11041960365;
+        final double nat = 0.02915789832;
+
         double jav = Math.min(
                 time(repeatedly(JAVA)),
                 time(repeatedly(JAVA)));
 
-        System.out.println("Speedup: " + (jav/nat));
+        System.out.println("Speedup: " + (jav/nat) + ": " + (100.*(jav/nat)/(start/nat)) + "% of the original speed");
     }
 
     private static Block repeatedly(final Block in) {

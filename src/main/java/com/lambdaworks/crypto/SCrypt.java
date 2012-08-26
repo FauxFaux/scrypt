@@ -2,14 +2,19 @@
 
 package com.lambdaworks.crypto;
 
-import com.lambdaworks.jni.*;
+import static java.lang.Integer.MAX_VALUE;
+import static java.lang.System.arraycopy;
+
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.IntBuffer;
+import java.security.GeneralSecurityException;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import java.security.GeneralSecurityException;
 
-import static java.lang.Integer.MAX_VALUE;
-import static java.lang.System.arraycopy;
+import com.lambdaworks.jni.LibraryLoader;
+import com.lambdaworks.jni.LibraryLoaders;
 
 /**
  * An implementation of the <a href="http://www.tarsnap.com/scrypt/scrypt.pdf"/>scrypt</a>
@@ -147,15 +152,16 @@ public class SCrypt {
     }
 
     public static void blockmix_salsa8(byte[] BY, int Bi, int Yi, int r) {
-        byte[] X = new byte[64];
+        ByteBuffer X = ByteBuffer.allocate(64);
+        X.order(ByteOrder.LITTLE_ENDIAN);
         int i;
 
-        arraycopy(BY, Bi + (2 * r - 1) * 64, X, 0, 64);
+        arraycopy(BY, Bi + (2 * r - 1) * 64, X.array(), 0, 64);
 
         for (i = 0; i < 2 * r; i++) {
-            blockxor(BY, i * 64, X, 0, 64);
+            blockxor2(BY, i * 64, X.array());
             salsa20_8(X);
-            arraycopy(X, 0, BY, Yi + (i * 64), 64);
+            arraycopy(X.array(), 0, BY, Yi + (i * 64), 64);
         }
 
         for (i = 0; i < r; i++) {
@@ -171,19 +177,14 @@ public class SCrypt {
         return (a << b) | (a >>> (32 - b));
     }
 
-    public static void salsa20_8(byte[] B) {
-        int[] B32 = new int[16];
+    public static void salsa20_8(ByteBuffer B) {
         int[] x   = new int[16];
         int i;
 
-        for (i = 0; i < 16; i++) {
-            B32[i]  = (B[i * 4 + 0] & 0xff) << 0;
-            B32[i] |= (B[i * 4 + 1] & 0xff) << 8;
-            B32[i] |= (B[i * 4 + 2] & 0xff) << 16;
-            B32[i] |= (B[i * 4 + 3] & 0xff) << 24;
-        }
+        IntBuffer B32 = B.asIntBuffer();
 
-        arraycopy(B32, 0, x, 0, 16);
+        for (i = 0; i < 16; ++i)
+            x[i] = B32.get(i);
 
         for (i = 8; i > 0; i -= 2) {
             x[ 4] ^= R(x[ 0]+x[12], 7);  x[ 8] ^= R(x[ 4]+x[ 0], 9);
@@ -204,19 +205,18 @@ public class SCrypt {
             x[14] ^= R(x[13]+x[12],13);  x[15] ^= R(x[14]+x[13],18);
         }
 
-        for (i = 0; i < 16; ++i) B32[i] = x[i] + B32[i];
-
-        for (i = 0; i < 16; i++) {
-            B[i * 4 + 0] = (byte) (B32[i] >> 0  & 0xff);
-            B[i * 4 + 1] = (byte) (B32[i] >> 8  & 0xff);
-            B[i * 4 + 2] = (byte) (B32[i] >> 16 & 0xff);
-            B[i * 4 + 3] = (byte) (B32[i] >> 24 & 0xff);
-        }
+        for (i = 0; i < 16; ++i) B32.put(i, x[i] + B32.get(i));
     }
 
     public static void blockxor(byte[] S, int Si, byte[] D, int Di, int len) {
         for (int i = 0; i < len; i++) {
             D[Di + i] ^= S[Si + i];
+        }
+    }
+
+    public static void blockxor2(byte[] S, int Si, byte[] D) {
+        for (int i = 0; i < 64; i++) {
+            D[0 + i] ^= S[Si + i];
         }
     }
 
