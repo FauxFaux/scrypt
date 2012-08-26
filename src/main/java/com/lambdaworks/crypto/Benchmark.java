@@ -32,21 +32,19 @@ public class Benchmark {
 
     public static final String ANS = "qvz1XkWUdv9r5vB2UucTp/UVJ5rkQ51uGEZfRdILG7M=";
 
-    static class Timer {
-        final long start = System.nanoTime();
-        void print() {
-            System.out.println((System.nanoTime() - start) / 1e9 / BLOCK + " seconds per kdf");
-        }
-    }
-
     public static void main(String[] args) throws Exception {
         System.out.println("native:");
-        time(repeatedly(NATIVE));
-        time(repeatedly(NATIVE));
+
+        double nat = Math.min(
+                time(repeatedly(NATIVE)),
+                time(repeatedly(NATIVE)));
 
         System.out.println("java:");
-        time(repeatedly(JAVA));
-        time(repeatedly(JAVA));
+        double jav = Math.min(
+                time(repeatedly(JAVA)),
+                time(repeatedly(JAVA)));
+
+        System.out.println("Speedup: " + (jav/nat));
     }
 
     private static Block repeatedly(final Block in) {
@@ -64,10 +62,12 @@ public class Benchmark {
             throw new IllegalStateException();
     }
 
-    private static void time(Block block) throws Exception {
-        final Timer t = new Timer();
+    private static double time(Block block) throws Exception {
+        final long start = System.nanoTime();
         block.run();
-        t.print();
+        double spkdf = (System.nanoTime() - start) / 1e9 / BLOCK;
+        System.out.println(spkdf + " seconds per kdf");
         Thread.sleep(100);
+        return spkdf;
     }
 }
