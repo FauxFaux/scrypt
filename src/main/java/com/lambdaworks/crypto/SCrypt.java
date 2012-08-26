@@ -155,11 +155,13 @@ public class SCrypt {
     }
 
     private static void arraycopy(ByteBuffer src, int srcPos, byte[] dest, int destPos, int len) {
-        System.arraycopy(src.array(), srcPos, dest, destPos, len);
+        for (int i = 0; i < len; ++i)
+            dest[i + destPos] = src.get(srcPos + i);
     }
 
     private static void arraycopy(byte[] src, int srcPos, ByteBuffer dest, int destPos, int len) {
-        System.arraycopy(src, srcPos, dest.array(), destPos, len);
+        for (int i = 0; i < len; ++i)
+            dest.put(i + destPos, src[srcPos + i]);
     }
 
     public static void blockmix_salsa8(byte[] BY, int Bi, int Yi, int r) {
@@ -167,14 +169,14 @@ public class SCrypt {
         X.order(ByteOrder.LITTLE_ENDIAN);
         int i;
 
-        arraycopy(BY, Bi + (2 * r - 1) * 64, X.array(), 0, 64);
+        arraycopy(BY, Bi + (2 * r - 1) * 64, X, 0, 64);
 
         for (i = 0; i < 2 * r; i++) {
             for (int j = 0; j < 64; j++) {
                 X.put(j, (byte)(X.get(j) ^ BY[i * 64 + j]));
             }
             salsa20_8(X);
-            arraycopy(X.array(), 0, BY, Yi + (i * 64), 64);
+            arraycopy(X, 0, BY, Yi + (i * 64), 64);
         }
 
         for (i = 0; i < r; i++) {
