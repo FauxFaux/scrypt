@@ -3,7 +3,6 @@
 package com.lambdaworks.crypto;
 
 import static java.lang.Integer.MAX_VALUE;
-import static java.lang.System.arraycopy;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -149,6 +148,18 @@ public class SCrypt {
         }
 
         arraycopy(XY, Xi, B, Bi, 128 * r);
+    }
+
+    private static void arraycopy(byte[] src, int srcPos, byte[] dest, int destPos, int len) {
+        System.arraycopy(src, srcPos, dest, destPos, len);
+    }
+
+    private static void arraycopy(ByteBuffer src, int srcPos, byte[] dest, int destPos, int len) {
+        System.arraycopy(src.array(), srcPos, dest, destPos, len);
+    }
+
+    private static void arraycopy(byte[] src, int srcPos, ByteBuffer dest, int destPos, int len) {
+        System.arraycopy(src, srcPos, dest.array(), destPos, len);
     }
 
     public static void blockmix_salsa8(byte[] BY, int Bi, int Yi, int r) {
