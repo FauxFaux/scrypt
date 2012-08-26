@@ -155,8 +155,9 @@ public class SCrypt {
     }
 
     private static void arraycopy(ByteBuffer src, int srcPos, byte[] dest, int destPos, int len) {
-        for (int i = 0; i < len; ++i)
-            dest[i + destPos] = src.get(srcPos + i);
+        src.position(srcPos);
+        src.get(dest, destPos, len);
+        src.rewind();
     }
 
     private static void arraycopy(byte[] src, int srcPos, ByteBuffer dest, int destPos, int len) {
