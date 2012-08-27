@@ -144,9 +144,13 @@ public class SCrypt {
             blockmix_salsa8(XY, Xi, Yi, r, X, x);
         }
 
+        LongBuffer sl = V.asLongBuffer();
+        LongBuffer dl = XY.asLongBuffer();
         for (i = 0; i < N; i++) {
             int j = integerify(XY, Xi, r) & (N - 1);
-            blockxor(V, j * (128 * r), XY, Xi, 128 * r);
+            for (int k = 0; k < 128 * r / 8; k++) {
+                dl.put(Xi/8 + k, (dl.get(Xi/8 + k) ^ sl.get(j * (128 * r)/8 + k)));
+            }
             blockmix_salsa8(XY, Xi, Yi, r, X, x);
         }
 
@@ -184,8 +188,12 @@ public class SCrypt {
 
         arraycopy(BY, Bi + (2 * r - 1) * 64, X, 0, 64);
 
+        LongBuffer sl = BY.asLongBuffer();
+        LongBuffer dl = X.asLongBuffer();
         for (i = 0; i < 2 * r; i++) {
-            blockxor(BY, i*64, X, 0, 64);
+            for (int j = 0; j < 8; j++) {
+                dl.put(j, (dl.get(j) ^ sl.get(i*8 + j)));
+            }
             salsa20_8(X, x);
             arraycopy(X, 0, BY, Yi + (i * 64), 64);
         }
@@ -232,14 +240,6 @@ public class SCrypt {
 
         for (i = 0; i < 16; ++i) B32.put(i, x[i] + B32.get(i));
         B32.rewind();
-    }
-
-    public static void blockxor(ByteBuffer S, int Si, ByteBuffer D, int Di, int len) {
-        LongBuffer sl = S.asLongBuffer();
-        LongBuffer dl = D.asLongBuffer();
-        for (int i = 0; i < len / 8; i++) {
-            dl.put(Di/8 + i, (dl.get(Di/8 + i) ^ sl.get(Si/8 + i)));
-        }
     }
 
     public static int integerify(ByteBuffer B, int Bi, int r) {
