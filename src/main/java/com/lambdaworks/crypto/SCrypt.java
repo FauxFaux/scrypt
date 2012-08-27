@@ -115,14 +115,16 @@ public class SCrypt {
         byte[] DK = new byte[dkLen];
 
         byte[] B  = new byte[128 * r * p];
+        int x[]  = new int[16];
         ByteBuffer XY = bb(256 * r);
         ByteBuffer V  = bb(128 * r * N);
+        ByteBuffer X  = bb(64);
         int i;
 
         PBKDF.pbkdf2(mac, salt, 1, B, p * 128 * r);
 
         for (i = 0; i < p; i++) {
-            smix(B, i * 128 * r, r, N, V, XY);
+            smix(B, i * 128 * r, r, N, V, XY, X, x);
         }
 
         PBKDF.pbkdf2(mac, B, 1, DK, dkLen);
@@ -130,7 +132,7 @@ public class SCrypt {
         return DK;
     }
 
-    public static void smix(byte[] B, int Bi, int r, int N, ByteBuffer V, ByteBuffer XY) {
+    public static void smix(byte[] B, int Bi, int r, int N, ByteBuffer V, ByteBuffer XY, ByteBuffer X, int[] x) {
         int Xi = 0;
         int Yi = 128 * r;
         int i;
@@ -139,13 +141,13 @@ public class SCrypt {
 
         for (i = 0; i < N; i++) {
             arraycopy(XY, Xi, V, i * (128 * r), 128 * r);
-            blockmix_salsa8(XY, Xi, Yi, r);
+            blockmix_salsa8(XY, Xi, Yi, r, X, x);
         }
 
         for (i = 0; i < N; i++) {
             int j = integerify(XY, Xi, r) & (N - 1);
             blockxor(V, j * (128 * r), XY, Xi, 128 * r);
-            blockmix_salsa8(XY, Xi, Yi, r);
+            blockmix_salsa8(XY, Xi, Yi, r, X, x);
         }
 
         arraycopy(XY, Xi, B, Bi, 128 * r);
@@ -177,15 +179,14 @@ public class SCrypt {
         dst.rewind();
     }
 
-    public static void blockmix_salsa8(ByteBuffer BY, int Bi, int Yi, int r) {
-        ByteBuffer X = bb(64);
+    public static void blockmix_salsa8(ByteBuffer BY, int Bi, int Yi, int r, ByteBuffer X, int[] x) {
         int i;
 
         arraycopy(BY, Bi + (2 * r - 1) * 64, X, 0, 64);
 
         for (i = 0; i < 2 * r; i++) {
             blockxor(BY, i*64, X, 0, 64);
-            salsa20_8(X);
+            salsa20_8(X, x);
             arraycopy(X, 0, BY, Yi + (i * 64), 64);
         }
 
@@ -202,8 +203,7 @@ public class SCrypt {
         return (a << b) | (a >>> (32 - b));
     }
 
-    public static void salsa20_8(ByteBuffer B) {
-        int[] x   = new int[16];
+    public static void salsa20_8(ByteBuffer B, int[] x) {
         int i;
 
         IntBuffer B32 = B.asIntBuffer();
