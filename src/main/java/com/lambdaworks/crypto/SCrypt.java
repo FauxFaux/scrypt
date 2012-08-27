@@ -167,11 +167,11 @@ public class SCrypt {
     }
 
     static void arraycopy(ByteBuffer src, int srcPos, ByteBuffer dst, int dstPos, int length) {
-        byte b[] = new byte[length];
         src.position(srcPos);
-        src.get(b, 0, length);
+        ByteBuffer dup = src.duplicate();
+        dup.limit(srcPos + length);
         dst.position(dstPos);
-        dst.put(b);
+        dst.put(dup);
         src.rewind();
         dst.rewind();
     }
