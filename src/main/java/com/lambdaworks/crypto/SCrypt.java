@@ -222,7 +222,6 @@ public class SCrypt {
         IntBuffer B32 = B.asIntBuffer();
 
         B32.get(x);
-        B32.rewind();
 
         for (i = 8; i > 0; i -= 2) {
             x[ 4] ^= R(x[ 0]+x[12], 7);  x[ 8] ^= R(x[ 4]+x[ 0], 9);
@@ -244,7 +243,6 @@ public class SCrypt {
         }
 
         for (i = 0; i < 16; ++i) B32.put(i, x[i] + B32.get(i));
-        B32.rewind();
     }
 
     public static int integerify(ByteBuffer B, int Bi, int r) {
