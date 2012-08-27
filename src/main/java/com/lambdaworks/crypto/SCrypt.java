@@ -188,12 +188,17 @@ public class SCrypt {
 
         arraycopy(BY, Bi + (2 * r - 1) * 64, X, 0, 64);
 
-        LongBuffer sl = BY.asLongBuffer();
-        LongBuffer dl = X.asLongBuffer();
+        LongBuffer byl = BY.asLongBuffer();
+        LongBuffer xl = X.asLongBuffer();
         for (i = 0; i < 2 * r; i++) {
-            for (int j = 0; j < 8; j++) {
-                dl.put(j, (dl.get(j) ^ sl.get(i*8 + j)));
-            }
+            xl.put(0, xl.get(0) ^ byl.get(i*8 + 0));
+            xl.put(1, xl.get(1) ^ byl.get(i*8 + 1));
+            xl.put(2, xl.get(2) ^ byl.get(i*8 + 2));
+            xl.put(3, xl.get(3) ^ byl.get(i*8 + 3));
+            xl.put(4, xl.get(4) ^ byl.get(i*8 + 4));
+            xl.put(5, xl.get(5) ^ byl.get(i*8 + 5));
+            xl.put(6, xl.get(6) ^ byl.get(i*8 + 6));
+            xl.put(7, xl.get(7) ^ byl.get(i*8 + 7));
             salsa20_8(X, x);
             arraycopy(X, 0, BY, Yi + (i * 64), 64);
         }
