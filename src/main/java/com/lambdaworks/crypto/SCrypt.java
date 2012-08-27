@@ -7,6 +7,7 @@ import static java.lang.Integer.MAX_VALUE;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
+import java.nio.LongBuffer;
 import java.security.GeneralSecurityException;
 
 import javax.crypto.Mac;
@@ -234,8 +235,10 @@ public class SCrypt {
     }
 
     public static void blockxor(ByteBuffer S, int Si, ByteBuffer D, int Di, int len) {
-        for (int i = 0; i < len; i++) {
-            D.put(Di + i, (byte) (D.get(Di + i) ^ S.get(Si + i)));
+        LongBuffer sl = S.asLongBuffer();
+        LongBuffer dl = D.asLongBuffer();
+        for (int i = 0; i < len / 8; i++) {
+            dl.put(Di/8 + i, (dl.get(Di/8 + i) ^ sl.get(Si/8 + i)));
         }
     }
 
